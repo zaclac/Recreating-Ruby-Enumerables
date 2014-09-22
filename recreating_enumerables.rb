@@ -1,4 +1,5 @@
 module Enumerable
+## my_each and my_each_with_index are only included here for learning and convenience purposes as I attempted to gain a "Floor to Ceiling" appreciation for what happens with Enumerable  
   def my_each
     n = self.length
     i = 0
@@ -22,7 +23,7 @@ module Enumerable
   def my_select
     arr = []
       self.my_each do |x|
-      	if yield(x) arr.push(x)
+      	arr.push(x) if yield(x) 
       end
       arr
   end
@@ -30,7 +31,7 @@ module Enumerable
   def my_all?
     result = true
 	self.my_each do |x|
-	  unless yield(x) result = false
+	  result = false unless yield(x) 
 	end
 	result
   end
@@ -38,7 +39,7 @@ module Enumerable
   def my_any?
   	result = false
   	self.my_each do |x|
-  	  if yield(x) result = true
+  	  result = true if yield(x) 
   	end
   	  result
   end
@@ -46,7 +47,7 @@ module Enumerable
   def my_none?
   	result = true
   	self.my_each do |x|
-  	  if yield(x) result = false
+  	  result = false if yield(x) 
   	  end
   	  result
   end
@@ -54,7 +55,7 @@ module Enumerable
   def my_count
   	count = 0
   	self.my_each do |x|
-  	  if yield(x) count += 1
+  	  count += 1 if yield(x) 
   	  end
   	  count
   end
@@ -68,34 +69,34 @@ module Enumerable
   end
 
   def my_inject(initial = nil, sym = nil)
-	# This seems like a freaking mess
-	if sym
-	  if initial
-	    memo = initial
-	    self.my_each do |x|
-	      memo = memo.send(sym,x)
-	    end
-	  else
-	    memo = self[0]
-	    self[1..-1].my_each do |x|
-	      memo = memo.send(sym, x)
-	    end
+	# This still seems to be a mess, but less of a mess than before
+	case 
+	when initial.is_a?(Symbol)
+	  sym = initial
+	  memo = self[0]
+	  self[1..-1].my_each do |x|
+	    memo = memo.send(sym, x)
 	  end
-	end
-	if block_given?
-	  if initial
-	    memo = initial
-	    self.my_each do |x|
-	      memo = yield(memo,x)
-	    end
-	  else
-	  	memo = self[0]
-	  	self[1..-1].my_each do |x|
-	  	  memo = yield(memo,x)
-	  	end
+	  memo
+	when initial && sym
+	  memo = initial
+	  self.my_each do |x|
+	    memo = memo.send(sym,x)
 	  end
+	  memo
+	when initial && block_given?
+	  memo = initial
+	  self.my_each do |x|
+	    memo = yield(memo,x)
+	  end
+	  memo
+	when block_given?
+	  memo = self[0]
+	  self[1..-1].my_each do |x|
+	  	memo = yield(memo,x)
+	  end
+	  memo
 	end
-	memo
   end
 end
 
@@ -133,7 +134,6 @@ def test_my_methods
   puts "... with :+"
   puts test.my_inject(:+)
   puts test.inject(:+)
-  puts "... with (100, :+)"
   puts test.my_inject(100,:+)
   puts test.inject(100,:+)
   puts "... with block"
